@@ -22,11 +22,49 @@ class Category(models.Model):
                 counter = counter + 1
 
             self.slug = slug
-        
-        super().save(*args, **kwargs)
+        else:
+            base_slug = slugify(self.slug)
+            slug = base_slug
 
+            counter = 1
+            while Category.objects.filter(slug = slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter = counter + 1
+
+            self.slug = slug
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
-    
-    
+
+# what happens when we remove blank = true
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name)
+            slug = base_slug
+            counter = 1
+            while Tag.objects.filter(slug = slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter = counter + 1
+
+            self.slug = slug
+        else:
+            base_slug = slugify(self.slug)
+            slug = base_slug
+
+            counter = 1
+            while Tag.objects.filter(slug = slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter = counter + 1
+
+            self.slug = slug
+        
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
