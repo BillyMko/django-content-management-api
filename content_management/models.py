@@ -109,5 +109,12 @@ class Content(models.Model):
             self.slug = slug
         return super().save(*args, **kwargs)
 
+class ContentView(models.Model):
+    viewed_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="content_views")
+    content= models.ForeignKey(Content, on_delete=models.CASCADE, related_name="views")
+
+    def __str__(self):
+        return f"{self.content.title} viewed at {self.viewed_at}"
 
 
