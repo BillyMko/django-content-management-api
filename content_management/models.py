@@ -17,7 +17,7 @@ class Category(models.Model):
             slug = base_slug
 
             counter = 1
-            while Category.objects.filter(slug = slug).exists():
+            while Category.objects.filter(slug = slug).exclude(pk=self.pk).exists():
                 slug = f"{base_slug}-{counter}"
                 counter = counter + 1
 
@@ -27,17 +27,16 @@ class Category(models.Model):
             slug = base_slug
 
             counter = 1
-            while Category.objects.filter(slug = slug).exists():
+            while Category.objects.filter(slug = slug).exclude(pk=self.pk).exists():
                 slug = f"{base_slug}-{counter}"
                 counter = counter + 1
 
             self.slug = slug
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
-# what happens when we remove blank = true
 
 class Tag(models.Model):
     name = models.CharField(max_length=100)
@@ -48,7 +47,7 @@ class Tag(models.Model):
             base_slug = slugify(self.name)
             slug = base_slug
             counter = 1
-            while Tag.objects.filter(slug = slug).exists():
+            while Tag.objects.filter(slug = slug).exclude(pk=self.pk).exists():
                 slug = f"{base_slug}-{counter}"
                 counter = counter + 1
 
@@ -58,7 +57,7 @@ class Tag(models.Model):
             slug = base_slug
 
             counter = 1
-            while Tag.objects.filter(slug = slug).exists():
+            while Tag.objects.filter(slug = slug).exclude(pk=self.pk).exists():
                 slug = f"{base_slug}-{counter}"
                 counter = counter + 1
 
@@ -68,3 +67,47 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+class Content(models.Model):
+
+    DIFFICULTY_CHOICES = [('beginner', 'Beginner'),
+                        ('intermediate', 'Intermediate'),
+                        ('advanced', 'Advanced'), 
+                        ('expert', 'Expert')]
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    is_published = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    difficulty = models.CharField(max_length = 20, choices = DIFFICULTY_CHOICES, default='beginner')
+    metadata = models.JSONField(default=dict, blank=True)
+
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="contents")
+    tags = models.ManyToManyField(Tag, blank=True, related_name="contents")
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="contents")
+    slug = models.SlugField(unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while Content.objects.filter(slug = slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter = counter + 1
+
+            self.slug = slug
+        else:
+            base_slug = slugify(self.slug)
+            slug = base_slug
+
+            counter = 1
+            while Content.objects.filter(slug = slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter = counter + 1
+
+            self.slug = slug
+        return super().save(*args, **kwargs)
+
+
+
