@@ -51,6 +51,11 @@ class ContentListSerializer(serializers.ModelSerializer):
         model = Content
         fields = ["id", "title", "difficulty", "author", "category", "tags", "slug", "created_at"]
 
+    def validate_title(self, value):
+        if len((value).strip()) < 10:
+            raise serializers.ValidationError("Title must be at least 10 characters long")
+        return value
+
 class ContentDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
