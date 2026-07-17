@@ -10,6 +10,7 @@ from .serializers import (RegisterSerializer,
                           TagSerializer
                           )
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -47,6 +48,10 @@ class RegisterView(generics.CreateAPIView):
 class ContentViewset(viewsets.ModelViewSet):
 
     lookup_field = "slug"
+
+    filter_backends = [DjangoFilterBackend]
+
+    filterset_fields = ["difficulty", "category", "author"]
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
