@@ -11,6 +11,8 @@ from .serializers import (RegisterSerializer,
                           )
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
+
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -49,9 +51,10 @@ class ContentViewset(viewsets.ModelViewSet):
 
     lookup_field = "slug"
 
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
 
     filterset_fields = ["difficulty", "category", "author"]
+    search_fields = ["title", "body"]
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
