@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Content, Category, ContentView
 from .serializers import (RegisterSerializer,
@@ -9,35 +9,64 @@ from .serializers import (RegisterSerializer,
                           CategorySerializer,
                           TagSerializer
                           )
+from django.db.models import Q
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
-class ContentListView(generics.ListAPIView):
-    queryset = Content.objects.filter(is_published=True)
-    serializer_class = ContentListSerializer
+# class ContentListView(generics.ListAPIView):
+#     queryset = Content.objects.filter(is_published=True)
+#     serializer_class = ContentListSerializer
 
 
-class ContentRetrieveView(generics.RetrieveAPIView):
-    queryset = Content.objects.filter(is_published=True)
-    serializer_class = ContentDetailSerializer
+# class ContentRetrieveView(generics.RetrieveAPIView):
+#     queryset = Content.objects.filter(is_published=True)
+#     serializer_class = ContentDetailSerializer
+#     lookup_field = "slug"
+
+# class ContentListCreateView(generics.ListCreateAPIView):
+#     queryset = Content.objects.all()
+
+#     def get_serializer_class(self):
+
+#         if self.request.method == "POST":
+#             return ContentCreateSerializer
+        
+#         return ContentListSerializer
+    
+#     def get_permissions(self):
+#         if self.request.method == "POST":
+#             return [IsAuthenticated()]
+        
+#         return [AllowAny()]
+
+#     def perform_create(self, serializer):
+#         serializer.save(author=self.request.user)
+
+
+class ContentViewset(viewsets.ModelViewSet):
+
     lookup_field = "slug"
 
-class ContentListCreateView(generics.ListCreateAPIView):
-    queryset = Content.objects.all()
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return Content.objects.filter(Q(is_published=True) | Q(author = self.request.user))
 
     def get_serializer_class(self):
 
-        if self.request.method == "POST":
+        if self.action == "list":
+            return ContentListSerializer
+        
+        if self.action == "create":
             return ContentCreateSerializer
         
-        return ContentListSerializer
-    
-    def get_permissions(self):
-        if self.request.method == "POST":
-            return [IsAuthenticated()]
+        return ContentDetailSerializer
         
-        return [AllowAny()]
-
+    def get_permissions(self):
+        
+        if self.action in ["list","retrieve"]:
+            return [AllowAny()]
+        return [IsAuthenticated()]    
+    
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
