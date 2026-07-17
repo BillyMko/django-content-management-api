@@ -12,6 +12,7 @@ from .serializers import (RegisterSerializer,
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from .pagination import ContentPagination
 
 
 class RegisterView(generics.CreateAPIView):
@@ -56,11 +57,14 @@ class ContentViewset(viewsets.ModelViewSet):
     filterset_fields = ["difficulty", "category", "author"]
     search_fields = ["title", "body"]
     ordering_fields = ["created_at", "title", "difficulty"]
-    ordering = ["-created_at",]
+    ordering = ["-created_at"]
+    pagination_class = ContentPagination
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
             return Content.objects.filter(Q(is_published=True) | Q(author = self.request.user))
+        
+        return Content.objects.filter(is_published=True)
 
     def get_serializer_class(self):
 
