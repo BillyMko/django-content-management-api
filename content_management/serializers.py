@@ -88,7 +88,7 @@ class ContentCreateSerializer(serializers.ModelSerializer):
             queryset= Tag.objects.all(),
             source="tags",
             many=True,
-            required= False
+            required= False,
             )
         
     class Meta:
@@ -103,7 +103,7 @@ class ContentCreateSerializer(serializers.ModelSerializer):
             ]
     
     def create(self, validated_data):
-        tags = validated_data["tags"].pop()
+        tags = validated_data.pop("tags", [])
         content = Content.objects.create(**validated_data)
         content.tags.set(tags)
         return content
