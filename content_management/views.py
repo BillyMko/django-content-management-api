@@ -13,6 +13,9 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .pagination import ContentPagination
+from rest_framework.decorators import action
+from rest_framework import status
+from rest_framework.response import response
 
 
 class RegisterView(generics.CreateAPIView):
@@ -84,3 +87,16 @@ class ContentViewset(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @action(detail=True,
+            methods=["post"],
+            permission_classes=[IsAuthenticated])
+    
+    def publish(self, request, slug=None):
+        content = self.get_object()
+        content.is_publisehd = True
+        content.save()
+
+        return Response({"message":"Content pusblished successfully"}, 
+                        status=status.HTTP_200_OK
+                        )
