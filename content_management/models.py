@@ -13,9 +13,9 @@ class User(AbstractUser):
               ("rejected", "Rejected"),
               ("suspended","Suspended")]
     
-    status = models.Choices(max_length=20, choices = STATUS, default ="approved")
+    status = models.CharField(max_length=20, choices = STATUS, default ="approved")
     
-    role = models.Choices(max_length=20, choices = ROLE_CHOICES, default = "student")
+    role = models.CharField(max_length=20, choices = ROLE_CHOICES, default = "student")
 
 
 
