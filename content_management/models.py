@@ -4,7 +4,20 @@ from django.utils.text import slugify
 
 
 class User(AbstractUser):
-    pass
+    ROLE_CHOICES = [("student","Student"),
+                    ("instructor", "Instructor"),
+                    ("admin", "Admin")]
+    
+    STATUS = [("pending", "Pending"),
+              ("approved", "Approved"),
+              ("rejected", "Rejected"),
+              ("suspended","Suspended")]
+    
+    status = models.Choices(max_length=20, choices = STATUS, default ="approved")
+    
+    role = models.Choices(max_length=20, choices = ROLE_CHOICES, default = "student")
+
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
