@@ -15,7 +15,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from .pagination import ContentPagination
 from rest_framework.decorators import action
 from rest_framework import status
-from rest_framework.response import response
+from rest_framework.response import Response
 
 
 class RegisterView(generics.CreateAPIView):
@@ -94,7 +94,7 @@ class ContentViewset(viewsets.ModelViewSet):
     
     def publish(self, request, slug=None):
         content = self.get_object()
-        content.is_publisehd = True
+        content.is_published = True
         content.save()
 
         return Response({"message":"Content pusblished successfully"}, 
