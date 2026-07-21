@@ -10,13 +10,29 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'email']
+        fields = ['id', 'username', 'password', 'email', 'role']
+
+    def validate_role(self, value):
+        if value == "admin":
+            raise serializers.ValidationError("Admin accounts cannot be created through registration")
+        return value
 
     def create(self, validated_data):
+
+        if validated_data["role"] == "instructor":
+            validated_data["status"]= "pending"
+        
+        else:
+            validated_data["status"] = "approved"
+
+
+        
         user = User.objects.create_user(
                                         username=validated_data['username'],
                                         password=validated_data['password'],
-                                        email=validated_data['email']
+                                        email=validated_data['email'],
+                                        role=validated_data['role'],
+                                        status=validated_data['status']
                                         )
 
         return user
