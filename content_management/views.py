@@ -16,7 +16,9 @@ from .pagination import ContentPagination
 from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.response import Response
-
+from django.contrib.auth import get_user_model
+User = get_user_model()
+from .permissions import IsAdmin
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -50,6 +52,57 @@ class RegisterView(generics.CreateAPIView):
 #     def perform_create(self, serializer):
 #         serializer.save(author=self.request.user)
 
+class UserManagementViewSet(viewsets.ModelViewSet):
+    lookup_field = "id"
+    queryset = User.objects.all()
+
+    @action(detail=True, methods=["post"], permission_classes=[IsAdmin])
+
+    def approve(self, request, id = None):
+        user = self.get_object()
+        user.status = "approve"
+        user.save()
+
+        return Response({"message": "Instructor approved successfully"}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=["post"], permission_classes=[IsAdmin])
+    
+    def reject(self, request, id = None):
+        user = self.get_object()
+        if user.role != "instructor":
+            return Response({"message": "Only an instructor can be rejected"}, status=status.HTTP_400_BAD_REQUEST)
+        user.status = "rejected"
+        user.save()
+
+        return Response({"message": "Instructor application rejected successfully"}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=["post"], permission_classes=[IsAdmin])
+
+    def suspend(self, request, id = None):
+        user = self.get_object()
+        if user.role != "instructor":
+            return Response({"message": "Only an instructor can be rejected"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user.status != "approved":
+            return Response({"message": "Only approved instructors can be suspended"}, status=status.HTTP_400_BAD_REQUEST)
+        user.status = "suspended"
+        user.save()
+
+        return Response({"message": "Instructor suspended successfully"}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=["post"], permission_classes=[IsAdmin])
+
+    def reinstate(self, request, id = None):
+        user = self.get_object()
+        if user.role != "instructor":
+            return Response({"message": "Only an instructor can be reinstated"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user.status != "suspended":
+            return Response({"message": "Only suspended instructors can be reinstated"}, status=status.HTTP_400_BAD_REQUEST)
+        user.status = "approved"
+        user.save()
+
+        return Response({"message": "Instructor reinstated successfully"}, status=status.HTTP_200_OK)
 
 class ContentViewset(viewsets.ModelViewSet):
 

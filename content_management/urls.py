@@ -1,10 +1,11 @@
 from django.urls import path
-from .views import RegisterView, ContentViewset
+from .views import RegisterView, ContentViewset, UserManagementViewSet
 from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView)
 from rest_framework.routers import DefaultRouter
 
 router= DefaultRouter()
 router.register("content", ContentViewset, basename="content")
+router.register("users", UserManagementViewSet, basename="users")
 urlpatterns = router.urls
 
 urlpatterns = [
