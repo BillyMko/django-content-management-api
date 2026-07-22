@@ -18,7 +18,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .permissions import IsAdmin
+from .permissions import IsAdmin, IsApprovedInstructor, IsAuthorOrAdmin
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -136,6 +136,13 @@ class ContentViewset(viewsets.ModelViewSet):
         
         if self.action in ["list","retrieve"]:
             return [AllowAny()]
+        
+        if self.action == "create":
+            return [IsApprovedInstructor()]
+        
+        if self.action in ["update", "partial_update", "destroy"]:
+            return [IsApprovedInstructor(), IsAuthorOrAdmin()]
+        
         return [IsAuthenticated()]    
     
     def perform_create(self, serializer):
