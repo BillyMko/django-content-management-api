@@ -19,38 +19,10 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from .permissions import IsAdmin, IsApprovedInstructor, IsAuthorOrAdmin
+from .filters import ContentFilter
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
-
-# class ContentListView(generics.ListAPIView):
-#     queryset = Content.objects.filter(is_published=True)
-#     serializer_class = ContentListSerializer
-
-
-# class ContentRetrieveView(generics.RetrieveAPIView):
-#     queryset = Content.objects.filter(is_published=True)
-#     serializer_class = ContentDetailSerializer
-#     lookup_field = "slug"
-
-# class ContentListCreateView(generics.ListCreateAPIView):
-#     queryset = Content.objects.all()
-
-#     def get_serializer_class(self):
-
-#         if self.request.method == "POST":
-#             return ContentCreateSerializer
-        
-#         return ContentListSerializer
-    
-#     def get_permissions(self):
-#         if self.request.method == "POST":
-#             return [IsAuthenticated()]
-        
-#         return [AllowAny()]
-
-#     def perform_create(self, serializer):
-#         serializer.save(author=self.request.user)
 
 class UserManagementViewSet(viewsets.ModelViewSet):
     lookup_field = "id"
@@ -110,7 +82,7 @@ class ContentViewset(viewsets.ModelViewSet):
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
-    filterset_fields = ["difficulty", "category", "author"]
+    filterset_class = ContentFilter
     search_fields = ["title", "body"]
     ordering_fields = ["created_at", "title", "difficulty"]
     ordering = ["-created_at"]
