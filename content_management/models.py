@@ -23,6 +23,8 @@ class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True,blank=True)
     description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -54,6 +56,7 @@ class Category(models.Model):
 class Tag(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -87,12 +90,19 @@ class Content(models.Model):
                         ('intermediate', 'Intermediate'),
                         ('advanced', 'Advanced'), 
                         ('expert', 'Expert')]
+    
+    STATUS_CHOICES = [
+         ("draft", "Draft"),
+         ("published", "Published"), 
+         ("archived","Archived")
+    ]
     title = models.CharField(max_length=200)
     body = models.TextField()
     is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     difficulty = models.CharField(max_length = 20, choices = DIFFICULTY_CHOICES, default='beginner')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     metadata = models.JSONField(default=dict, blank=True)
 
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="contents")
