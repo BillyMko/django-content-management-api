@@ -11,14 +11,17 @@ from .serializers import (RegisterSerializer,
                           )
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.filters import (SearchFilter, 
+                                    OrderingFilter)
 from .pagination import ContentPagination
 from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .permissions import IsAdmin, IsApprovedInstructor, IsAuthorOrAdmin
+from .permissions import (IsAdmin,
+                          IsApprovedInstructor,
+                          IsAuthorOrAdmin)
 from .filters import ContentFilter
 
 class RegisterView(generics.CreateAPIView):
@@ -122,13 +125,42 @@ class ContentViewset(viewsets.ModelViewSet):
 
     @action(detail=True,
             methods=["post"],
-            permission_classes=[IsAuthenticated])
+            permission_classes=[IsAuthorOrAdmin])
     
     def publish(self, request, slug=None):
         content = self.get_object()
         content.is_published = True
+        content.status = "published"
         content.save()
 
-        return Response({"message":"Content pusblished successfully"}, 
+        return Response(
+                        {"message":"Content pusblished successfully"}, 
                         status=status.HTTP_200_OK
                         )
+    
+    @action(detail=True,
+            methods=["post"],
+            permission_classes=[IsAuthorOrAdmin])
+    
+    def archive(self, request, slug=None):
+        content_obj = self.get_object()
+        content.is_published = False
+        content.status = "archived"
+        content.save()
+
+        return Response(
+                        {"message":"Content archived successfully"}, 
+                        status=status.HTTP_200_OK
+                        )
+
+    def retrieve(self, request, *args, **kwargs):
+        content_obj = self.get_object()
+        if request.user.is_authenticated == True:
+            user = request.user
+        else:
+            user = None
+        
+        ContentView.objects.create(user=request.user, content= content_obj, ip_address=self.get_client_ip(request))
+        serializer_obj = ContentDetailSerializer(content_obj)
+        
+        return Response(serializer_obj.data)
