@@ -131,10 +131,13 @@ class Content(models.Model):
 
             self.slug = slug
         return super().save(*args, **kwargs)
-
+    
+    def view_count(self):
+        return self.views.count()
+    
 class ContentView(models.Model):
     viewed_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="content_views")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL,null=True, blank=True,related_name="content_views")
     content= models.ForeignKey(Content, on_delete=models.CASCADE, related_name="views")
 
     def __str__(self):
