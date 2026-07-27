@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Content, Category, ContentView
+from .models import Content, Category, ContentView, Tag
 from .serializers import (RegisterSerializer,
                           ContentListSerializer,
                           ContentDetailSerializer,
@@ -80,6 +80,7 @@ class UserManagementViewSet(viewsets.ModelViewSet):
         return Response({"message": "Instructor reinstated successfully"}, status=status.HTTP_200_OK)
 
 class ContentViewset(viewsets.ModelViewSet):
+
 
     lookup_field = "slug"
 
@@ -164,3 +165,27 @@ class ContentViewset(viewsets.ModelViewSet):
         serializer_obj = ContentDetailSerializer(content_obj)
         
         return Response(serializer_obj.data)
+    
+class CategoryViewset(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = "slug"
+    
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        
+        return [IsAdmin]
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    lookup_field = "slug" 
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        
+        return [IsAdmin]
+
