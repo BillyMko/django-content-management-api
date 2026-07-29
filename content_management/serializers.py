@@ -76,6 +76,8 @@ class ContentDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     author = AuthorSerializer(read_only=True)
+    reading_time_minutes = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Content
@@ -89,8 +91,12 @@ class ContentDetailSerializer(serializers.ModelSerializer):
                   "created_at",
                   "body",
                   "metadata",
-                  "updated_at"
+                  "updated_at",
+                  "reading_time_minutes"
                   ]
+    def get_reading_time_minutes(self, obj):
+        number_of_words = len(obj.body.split())
+        return max(1, round(number_of_words / 200))
 
 class ContentCreateSerializer(serializers.ModelSerializer):   
 
@@ -124,3 +130,9 @@ class ContentCreateSerializer(serializers.ModelSerializer):
         content.tags.set(tags)
         return content
 
+class ContentStatisticsSerializer(serializers.Serializer):
+    content_id = serializers.IntegerField()
+    title = serializers.CharField()
+    total_views = serializers.IntegerField()
+    reading_time_minutes = serializers.IntegerField()
+    

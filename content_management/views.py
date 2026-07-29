@@ -119,6 +119,9 @@ class ContentViewset(viewsets.ModelViewSet):
         if self.action in ["update", "partial_update", "destroy"]:
             return [IsApprovedInstructor(), IsAuthorOrAdmin()]
         
+        if self.action =="stats":
+            return [AllowAny()]
+        
         return [IsAuthenticated()]    
     
     def perform_create(self, serializer):
@@ -153,6 +156,18 @@ class ContentViewset(viewsets.ModelViewSet):
                         {"message":"Content archived successfully"}, 
                         status=status.HTTP_200_OK
                         )
+    
+    @action(detail=True,
+            methods=["get"])
+
+    def stats(self, request, slug=None):
+        content = self.get_object()
+
+        return Response({
+            "content_id": content.id,
+            "title": content.title,
+            "total views": content.views.count()
+        })
 
     def retrieve(self, request, *args, **kwargs):
         content_obj = self.get_object()
@@ -161,7 +176,7 @@ class ContentViewset(viewsets.ModelViewSet):
         else:
             user = None
         
-        ContentView.objects.create(user=request.user, content= content_obj, ip_address=self.get_client_ip(request))
+        ContentView.objects.create(user = user, content= content_obj)
         serializer_obj = ContentDetailSerializer(content_obj)
         
         return Response(serializer_obj.data)
