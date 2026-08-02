@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'content_management',
     'django_filters',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -127,9 +128,22 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS':["django_filters.rest_framework.DjangoFilterBackend",],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Educational Content Management API",
+    "DESCRIPTION": """
+    API for managing educational content
+
+    Features include:
+    - authentication using JWT
+    - management of content categories and tags
+    - Search and filtering
+    - Content views statistics
+    """,
 }
