@@ -148,9 +148,9 @@ class ContentViewset(viewsets.ModelViewSet):
     
     def archive(self, request, slug=None):
         content_obj = self.get_object()
-        content.is_published = False
-        content.status = "archived"
-        content.save()
+        content_obj.is_published = False
+        content_obj.status = "archived"
+        content_obj.save()
 
         return Response(
                         {"message":"Content archived successfully"}, 
